@@ -1,7 +1,6 @@
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,87 +9,86 @@ public class TrainConsistAppTest {
     TrainConsistApp app = new TrainConsistApp();
 
     @Test
-    void testGrouping_BogiesGroupedByType() {
-        List<Bogie> bogies = new ArrayList<>();
-        bogies.add(new Bogie("Sleeper", 72));
-        bogies.add(new Bogie("Sleeper", 70));
-
-        Map<String, List<Bogie>> result = app.groupBogiesByType(bogies);
-
-        assertTrue(result.containsKey("Sleeper"));
-    }
-
-    @Test
-    void testGrouping_MultipleBogiesInSameGroup() {
-        List<Bogie> bogies = new ArrayList<>();
-        bogies.add(new Bogie("Sleeper", 72));
-        bogies.add(new Bogie("Sleeper", 70));
-
-        Map<String, List<Bogie>> result = app.groupBogiesByType(bogies);
-
-        assertEquals(2, result.get("Sleeper").size());
-    }
-
-    @Test
-    void testGrouping_DifferentBogieTypes() {
+    void testReduce_TotalSeatCalculation() {
         List<Bogie> bogies = new ArrayList<>();
         bogies.add(new Bogie("Sleeper", 72));
         bogies.add(new Bogie("AC Chair", 56));
 
-        Map<String, List<Bogie>> result = app.groupBogiesByType(bogies);
+        int result = app.countTotalSeats(bogies);
 
-        assertEquals(2, result.size());
+        assertEquals(128, result);
     }
 
     @Test
-    void testGrouping_EmptyBogieList() {
+    void testReduce_MultipleBogiesAggregation() {
+        List<Bogie> bogies = new ArrayList<>();
+        bogies.add(new Bogie("Sleeper", 72));
+        bogies.add(new Bogie("AC Chair", 56));
+        bogies.add(new Bogie("First Class", 24));
+
+        int result = app.countTotalSeats(bogies);
+
+        assertEquals(152, result);
+    }
+
+    @Test
+    void testReduce_SingleBogieCapacity() {
+        List<Bogie> bogies = new ArrayList<>();
+        bogies.add(new Bogie("Sleeper", 72));
+
+        int result = app.countTotalSeats(bogies);
+
+        assertEquals(72, result);
+    }
+
+    @Test
+    void testReduce_EmptyBogieList() {
         List<Bogie> bogies = new ArrayList<>();
 
-        Map<String, List<Bogie>> result = app.groupBogiesByType(bogies);
+        int result = app.countTotalSeats(bogies);
 
-        assertTrue(result.isEmpty());
+        assertEquals(0, result);
     }
 
     @Test
-    void testGrouping_SingleBogieCategory() {
+    void testReduce_CorrectCapacityExtraction() {
         List<Bogie> bogies = new ArrayList<>();
         bogies.add(new Bogie("First Class", 24));
 
-        Map<String, List<Bogie>> result = app.groupBogiesByType(bogies);
+        int result = app.countTotalSeats(bogies);
 
-        assertEquals(1, result.size());
+        assertEquals(24, result);
     }
 
     @Test
-    void testGrouping_MapContainsCorrectKeys() {
+    void testReduce_AllBogiesIncluded() {
         List<Bogie> bogies = new ArrayList<>();
         bogies.add(new Bogie("Sleeper", 72));
-        bogies.add(new Bogie("AC Chair", 56));
+        bogies.add(new Bogie("Sleeper", 70));
 
-        Map<String, List<Bogie>> result = app.groupBogiesByType(bogies);
+        int result = app.countTotalSeats(bogies);
 
-        assertTrue(result.containsKey("Sleeper"));
-        assertTrue(result.containsKey("AC Chair"));
+        assertEquals(142, result);
     }
 
     @Test
-    void testGrouping_GroupSizeValidation() {
-        List<Bogie> bogies = new ArrayList<>();
-        bogies.add(new Bogie("AC Chair", 56));
-        bogies.add(new Bogie("AC Chair", 60));
-
-        Map<String, List<Bogie>> result = app.groupBogiesByType(bogies);
-
-        assertEquals(2, result.get("AC Chair").size());
-    }
-
-    @Test
-    void testGrouping_OriginalListUnchanged() {
+    void testReduce_OriginalListUnchanged() {
         List<Bogie> bogies = new ArrayList<>();
         bogies.add(new Bogie("Sleeper", 72));
 
-        app.groupBogiesByType(bogies);
+        app.countTotalSeats(bogies);
 
         assertEquals(1, bogies.size());
+    }
+
+    @Test
+    void testReduce_NumericAggregationValidation() {
+        List<Bogie> bogies = new ArrayList<>();
+        bogies.add(new Bogie("AC Chair", 56));
+        bogies.add(new Bogie("First Class", 24));
+
+        int result = app.countTotalSeats(bogies);
+
+        assertEquals(80, result);
     }
 }
